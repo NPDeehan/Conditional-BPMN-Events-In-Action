@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.7.0">
+  <bpmn:process id="Conditional-BPMN-Events" name="Conditional BPMN Events" isExecutable="true">
+    <bpmn:startEvent id="StartEvent" name="Patient needs treatment" camunda:asyncBefore="true" camunda:initiator="patient">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="name" label="What is your name?" type="string" />
+          <camunda:formField id="feeling" label="Rate your pain from 1 to 10 (1 being lowest)" type="long" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>SequenceFlow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow1" sourceRef="StartEvent" targetRef="Activity_03ddphx" />
+    <bpmn:endEvent id="EndEvent" name="Patient is treated!">
+      <bpmn:incoming>Flow_0w65yrd</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_08rkmkc" sourceRef="Activity_03ddphx" targetRef="Gateway_1je6rrl" />
+    <bpmn:userTask id="Activity_03ddphx" name="Select your doctor" camunda:assignee="#{patient}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="doctor" label="Pick your Doctor" type="enum">
+            <camunda:value id="who" name="Doctor Who" />
+            <camunda:value id="grey" name="Meredith Grey" />
+            <camunda:value id="snape" name="Professor Snape" />
+          </camunda:formField>
+          <camunda:formField id="feeling" label="Rate your pain from 1 to 10 (1 being lowest)" type="long" />
+        </camunda:formData>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">execution.setVariable('doctorPicked', false)</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow1</bpmn:incoming>
+      <bpmn:outgoing>Flow_08rkmkc</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="Activity_14v6v3w" triggeredByEvent="true">
+      <bpmn:startEvent id="Event_0ky1mhp" name="Doctor or Grey Picked" camunda:asyncBefore="true" camunda:asyncAfter="true" isInterrupting="false">
+        <bpmn:extensionElements>
+          <camunda:executionListener event="end">
+            <camunda:script scriptFormat="javascript">execution.setVariable('doctorPicked', true)</camunda:script>
+          </camunda:executionListener>
+        </bpmn:extensionElements>
+        <bpmn:outgoing>Flow_0mm3teh</bpmn:outgoing>
+        <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_0hvnabh">
+          <bpmn:condition xsi:type="bpmn:tFormalExpression">#{(doctor == 'grey' or doctor == 'who') and (doctorPicked == false)}</bpmn:condition>
+        </bpmn:conditionalEventDefinition>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="Flow_0mm3teh" sourceRef="Event_0ky1mhp" targetRef="Activity_1nlwl93" />
+      <bpmn:endEvent id="Event_15k9uq9" name="Companion is picked.">
+        <bpmn:incoming>Flow_1plh1ou</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_1plh1ou" sourceRef="Activity_1nlwl93" targetRef="Event_15k9uq9" />
+      <bpmn:userTask id="Activity_1nlwl93" name="Pick your companion" camunda:assignee="#{patient}">
+        <bpmn:extensionElements>
+          <camunda:formData>
+            <camunda:formField id="companion" label="Which companion should join your doctor?" type="enum">
+              <camunda:value id="yang" name="Cristina Yang" />
+              <camunda:value id="donna" name="Donna Noble" />
+              <camunda:value id="none" name="No One" />
+            </camunda:formField>
+            <camunda:formField id="feeling" label="Rate your pain from 1 to 10 (1 being lowest)" type="long" />
+          </camunda:formData>
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_0mm3teh</bpmn:incoming>
+        <bpmn:outgoing>Flow_1plh1ou</bpmn:outgoing>
+      </bpmn:userTask>
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="Event_0yajswg" name="Snape is&#10;picked" attachedToRef="Activity_03ddphx">
+      <bpmn:outgoing>Flow_0gdv7yz</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_1uz13zu">
+        <bpmn:condition xsi:type="bpmn:tFormalExpression">#{doctor == 'snape'}</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_0gdv7yz" sourceRef="Event_0yajswg" targetRef="Activity_0re6tm4" />
+    <bpmn:userTask id="Activity_0re6tm4" name="Go to the Potions Room" camunda:assignee="#{patient}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="harry" label="Do you happen to be Harry Potter?" type="boolean" />
+          <camunda:formField id="feeling" label="Rate your pain from 1 to 10 (1 being lowest)" type="long" />
+          <camunda:formField id="companion" label="Who should join you for moral support?" type="enum">
+            <camunda:value id="hermione" name="Hermione" />
+            <camunda:value id="ron" name="Ron" />
+            <camunda:value id="neville" name="Neville" />
+          </camunda:formField>
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0gdv7yz</bpmn:incoming>
+      <bpmn:outgoing>Flow_1e8o7vg</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:eventBasedGateway id="Gateway_1je6rrl">
+      <bpmn:incoming>Flow_08rkmkc</bpmn:incoming>
+      <bpmn:outgoing>Flow_1o1c8r2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0v3e3de</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_0u02v67" name="Dr. Yang picked as Companion">
+      <bpmn:incoming>Flow_1o1c8r2</bpmn:incoming>
+      <bpmn:outgoing>Flow_1u1stfs</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_0bjl3wl">
+        <bpmn:condition xsi:type="bpmn:tFormalExpression">#{companion == 'yang'}</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1o1c8r2" sourceRef="Gateway_1je6rrl" targetRef="Event_0u02v67" />
+    <bpmn:intermediateCatchEvent id="Event_1ivfvqv" name="Donna picked as Companion">
+      <bpmn:incoming>Flow_0v3e3de</bpmn:incoming>
+      <bpmn:outgoing>Flow_02d51hv</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_1ymmeoq">
+        <bpmn:condition xsi:type="bpmn:tFormalExpression">#{companion == 'donna'}</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_0v3e3de" sourceRef="Gateway_1je6rrl" targetRef="Event_1ivfvqv" />
+    <bpmn:exclusiveGateway id="Gateway_0a9yk17">
+      <bpmn:incoming>Flow_1u1stfs</bpmn:incoming>
+      <bpmn:incoming>Flow_02d51hv</bpmn:incoming>
+      <bpmn:outgoing>Flow_13v917p</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1u1stfs" sourceRef="Event_0u02v67" targetRef="Gateway_0a9yk17" />
+    <bpmn:sequenceFlow id="Flow_02d51hv" sourceRef="Event_1ivfvqv" targetRef="Gateway_0a9yk17" />
+    <bpmn:sequenceFlow id="Flow_13v917p" sourceRef="Gateway_0a9yk17" targetRef="Gateway_143nde4" />
+    <bpmn:sequenceFlow id="Flow_0w65yrd" sourceRef="Activity_00aay6z" targetRef="EndEvent" />
+    <bpmn:userTask id="Activity_00aay6z" name="The Doctor will see you now" camunda:assignee="#{patient}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="feeling" label="Rate your pain from 1 to 10 (1 being lowest)" type="long" />
+          <camunda:formField id="doctor" label="Your doctor is:" type="string">
+            <camunda:validation>
+              <camunda:constraint name="readonly" config="true" />
+            </camunda:validation>
+          </camunda:formField>
+          <camunda:formField id="companion" label="The doctor is joined by" type="string">
+            <camunda:validation>
+              <camunda:constraint name="readonly" config="true" />
+            </camunda:validation>
+          </camunda:formField>
+          <camunda:formField id="name" label="Your Name is" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ti036a</bpmn:incoming>
+      <bpmn:outgoing>Flow_0w65yrd</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_143nde4">
+      <bpmn:incoming>Flow_13v917p</bpmn:incoming>
+      <bpmn:incoming>Flow_1e8o7vg</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ti036a</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1ti036a" sourceRef="Gateway_143nde4" targetRef="Activity_00aay6z" />
+    <bpmn:sequenceFlow id="Flow_1e8o7vg" sourceRef="Activity_0re6tm4" targetRef="Gateway_143nde4" />
+    <bpmn:subProcess id="Activity_0xtyyak" triggeredByEvent="true">
+      <bpmn:startEvent id="Event_00yz0ro" name="Feeling like death!" camunda:asyncBefore="true">
+        <bpmn:outgoing>Flow_03ykq9t</bpmn:outgoing>
+        <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_0qbrpts">
+          <bpmn:condition xsi:type="bpmn:tFormalExpression">#{feeling &gt; 8}</bpmn:condition>
+        </bpmn:conditionalEventDefinition>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="Flow_03ykq9t" sourceRef="Event_00yz0ro" targetRef="Activity_09x2gkn" />
+      <bpmn:endEvent id="Event_1pn8b2w" name="Patient is.. ok...probably">
+        <bpmn:incoming>Flow_1h6qo7d</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_1h6qo7d" sourceRef="Activity_09x2gkn" targetRef="Event_1pn8b2w" />
+      <bpmn:userTask id="Activity_09x2gkn" name="Go To The Emergancy Room" camunda:assignee="#{patient}">
+        <bpmn:extensionElements>
+          <camunda:formData>
+            <camunda:formField id="doctor" label="Your Doctor is" type="string">
+              <camunda:validation>
+                <camunda:constraint name="readonly" config="true" />
+              </camunda:validation>
+            </camunda:formField>
+            <camunda:formField id="companion" label="The doctor is joined by" type="string">
+              <camunda:validation>
+                <camunda:constraint name="readonly" config="true" />
+              </camunda:validation>
+            </camunda:formField>
+            <camunda:formField id="feeling" label="Your pain is currently very high..." type="long">
+              <camunda:validation>
+                <camunda:constraint name="readonly" config="true" />
+              </camunda:validation>
+            </camunda:formField>
+            <camunda:formField id="name" label="In case you&#39;ve forgotten, your name is:" type="string">
+              <camunda:validation>
+                <camunda:constraint name="readonly" config="true" />
+              </camunda:validation>
+            </camunda:formField>
+          </camunda:formData>
+          <camunda:executionListener event="start">
+            <camunda:script scriptFormat="javascript">if(execution.getVariable('doctor') == null){
+execution.setVariable('doctor', 'Oh no... its Niall')
+execution.setVariable('companion', 'A hawk called Ursula')
+}</camunda:script>
+          </camunda:executionListener>
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_03ykq9t</bpmn:incoming>
+        <bpmn:outgoing>Flow_1h6qo7d</bpmn:outgoing>
+      </bpmn:userTask>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_1lq7sno" sourceRef="Event_103efl2" targetRef="Activity_0wh04m7" />
+    <bpmn:scriptTask id="Activity_0wh04m7" name="Minus 10 points from gryffindor" scriptFormat="javascript">
+      <bpmn:incoming>Flow_1lq7sno</bpmn:incoming>
+      <bpmn:outgoing>Flow_1bl6px1</bpmn:outgoing>
+      <bpmn:script>print('Minus 10 points from gryffindor!!!!!!')</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:boundaryEvent id="Event_103efl2" name="You&#39;re harry potter?" cancelActivity="false" attachedToRef="Activity_0re6tm4">
+      <bpmn:outgoing>Flow_1lq7sno</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_0nrb2e4">
+        <bpmn:condition xsi:type="bpmn:tFormalExpression">#{harry}</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="Event_0xvk6p4">
+      <bpmn:incoming>Flow_1bl6px1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1bl6px1" sourceRef="Activity_0wh04m7" targetRef="Event_0xvk6p4" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Conditional-BPMN-Events">
+      <bpmndi:BPMNEdge id="Flow_1lq7sno_di" bpmnElement="Flow_1lq7sno">
+        <di:waypoint x="490" y="192" />
+        <di:waypoint x="490" y="120" />
+        <di:waypoint x="560" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e8o7vg_di" bpmnElement="Flow_1e8o7vg">
+        <di:waypoint x="530" y="250" />
+        <di:waypoint x="860" y="250" />
+        <di:waypoint x="860" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ti036a_di" bpmnElement="Flow_1ti036a">
+        <di:waypoint x="885" y="400" />
+        <di:waypoint x="930" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0w65yrd_di" bpmnElement="Flow_0w65yrd">
+        <di:waypoint x="1030" y="400" />
+        <di:waypoint x="1082" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13v917p_di" bpmnElement="Flow_13v917p">
+        <di:waypoint x="765" y="400" />
+        <di:waypoint x="835" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02d51hv_di" bpmnElement="Flow_02d51hv">
+        <di:waypoint x="628" y="510" />
+        <di:waypoint x="740" y="510" />
+        <di:waypoint x="740" y="425" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1u1stfs_di" bpmnElement="Flow_1u1stfs">
+        <di:waypoint x="628" y="400" />
+        <di:waypoint x="715" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0v3e3de_di" bpmnElement="Flow_0v3e3de">
+        <di:waypoint x="480" y="425" />
+        <di:waypoint x="480" y="510" />
+        <di:waypoint x="592" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1o1c8r2_di" bpmnElement="Flow_1o1c8r2">
+        <di:waypoint x="505" y="400" />
+        <di:waypoint x="592" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gdv7yz_di" bpmnElement="Flow_0gdv7yz">
+        <di:waypoint x="330" y="342" />
+        <di:waypoint x="330" y="250" />
+        <di:waypoint x="430" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08rkmkc_di" bpmnElement="Flow_08rkmkc">
+        <di:waypoint x="370" y="400" />
+        <di:waypoint x="455" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_08va5r8_di" bpmnElement="SequenceFlow1">
+        <di:waypoint x="209" y="400" />
+        <di:waypoint x="270" y="400" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="228" y="95" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bl6px1_di" bpmnElement="Flow_1bl6px1">
+        <di:waypoint x="660" y="120" />
+        <di:waypoint x="722" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent">
+        <dc:Bounds x="173" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="158" y="418" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0fkea3f_di" bpmnElement="EndEvent">
+        <dc:Bounds x="1082" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1058" y="418" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0dcdppr_di" bpmnElement="Activity_03ddphx">
+        <dc:Bounds x="270" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_108miv3_di" bpmnElement="Activity_0wh04m7">
+        <dc:Bounds x="560" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0xvk6p4_di" bpmnElement="Event_0xvk6p4">
+        <dc:Bounds x="722" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0xzbbfv_di" bpmnElement="Activity_14v6v3w" isExpanded="true">
+        <dc:Bounds x="120" y="510" width="330" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1plh1ou_di" bpmnElement="Flow_1plh1ou">
+        <di:waypoint x="330" y="610" />
+        <di:waypoint x="392" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mm3teh_di" bpmnElement="Flow_0mm3teh">
+        <di:waypoint x="176" y="610" />
+        <di:waypoint x="230" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_057kgoe_di" bpmnElement="Event_0ky1mhp">
+        <dc:Bounds x="140" y="592" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="122" y="635" width="73" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_15k9uq9_di" bpmnElement="Event_15k9uq9">
+        <dc:Bounds x="392" y="592" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="376" y="635" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0dutasw_di" bpmnElement="Activity_1nlwl93">
+        <dc:Bounds x="230" y="570" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jgpscb_di" bpmnElement="Activity_0re6tm4">
+        <dc:Bounds x="430" y="210" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0fa3rj6_di" bpmnElement="Gateway_1je6rrl">
+        <dc:Bounds x="455" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0u02v67_di" bpmnElement="Event_0u02v67">
+        <dc:Bounds x="592" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="572" y="425" width="77" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ivfvqv_di" bpmnElement="Event_1ivfvqv">
+        <dc:Bounds x="592" y="492" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="569" y="535" width="83" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0a9yk17_di" bpmnElement="Gateway_0a9yk17" isMarkerVisible="true">
+        <dc:Bounds x="715" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_061uibw_di" bpmnElement="Activity_00aay6z">
+        <dc:Bounds x="930" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_143nde4_di" bpmnElement="Gateway_143nde4" isMarkerVisible="true">
+        <dc:Bounds x="835" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1l0z2sv_di" bpmnElement="Activity_0xtyyak" isExpanded="true">
+        <dc:Bounds x="805" y="520" width="350" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1h6qo7d_di" bpmnElement="Flow_1h6qo7d">
+        <di:waypoint x="1040" y="620" />
+        <di:waypoint x="1102" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03ykq9t_di" bpmnElement="Flow_03ykq9t">
+        <di:waypoint x="881" y="620" />
+        <di:waypoint x="940" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_061sbrs_di" bpmnElement="Event_00yz0ro">
+        <dc:Bounds x="845" y="602" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="819" y="645" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1pn8b2w_di" bpmnElement="Event_1pn8b2w">
+        <dc:Bounds x="1102" y="602" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1088" y="645" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04amjjr_di" bpmnElement="Activity_09x2gkn">
+        <dc:Bounds x="940" y="580" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0aon3lc_di" bpmnElement="Event_0yajswg">
+        <dc:Bounds x="312" y="342" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="268" y="326" width="44" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0kp4q1i_di" bpmnElement="Event_103efl2">
+        <dc:Bounds x="472" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="420" y="166" width="59" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
