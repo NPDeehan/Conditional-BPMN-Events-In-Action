@@ -22,6 +22,11 @@ This will then send the process to `Go tot he Potoins Room` task.
 
 There are lots of way of using conditional events in BPMN and in this example I demonstrate the following:
 
+### Intermediate Conditional Event (with Gateway)
+
+![ConIntGate](src/main/resources/static/images/conditional-gateway.png)
+This is an example where the process is waiting at a certain point (the gateway) until one of the two events it's waiting for becomes true. Once any one of the events triggeres the process continues along that sequence flow. 
+
 ### Interrupting Conditional Boundary Event.
 ![ConInt](src/main/resources/static/images/conditional-interupting.png)
 
